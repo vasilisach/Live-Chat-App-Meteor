@@ -1,0 +1,9 @@
+meteor add accounts-ui
+meteor add accounts-password
+meteor npm install --save bcrypt
+meteor add arillo:flow-router-helper
+meteor add reactive-var
+meteor add percolate:momentum
+meteor remove autopublish
+meteor add mrt:moment
+meteor add-platform android

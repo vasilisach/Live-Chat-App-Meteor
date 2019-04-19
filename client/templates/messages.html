@@ -1,0 +1,26 @@
+<template name="messages">
+    <div class="container">
+        <header>
+            <h1>Meteor Chat</h1>
+            {{> loginButtons}}
+        </header>
+        <ul class="message-window">
+            {{#each recentMessages}}
+                {{> message}}
+            {{/each}}
+        </ul>
+        {{#momentum plugin="fade"}}
+            {{#if thereAreUnreadMessages}}
+                <button class="more-messages">New Messages &#x25BE;</button>
+            {{/if}}
+        {{/momentum}}
+        <footer>
+            {{#if currentUser}}
+                <form class="new-message">
+                    <input type="text" name="text" placeholder="Add a message" autocomplete="off" />
+                </form>
+            {{/if}}
+        </footer>
+    </div>
+</template>
+
