@@ -1,28 +1,28 @@
 <template name="chatsList">
     <header>
-        <a name="brand" href={{pathFor 'chats'}}>METEOR CHAT APP</a>
-        {{> loginButtons align='left'}}
+        <h1>Meteor Chat</h1>
+        {{> loginButtons}}
     </header>
-    {{#if currentUser}}
-        <div class="container_search">
-            <form class="search">
-                <p><input type="text" name="search" placeholder="Search"></p>
-            </form>
-        </div>
-        {{#if chatsListCount}}
-            <div class="chatsList">
-                {{#each chatsList}}
-                    {{> chatItem}}
-                {{/each}}
+    <div class="main">
+        {{#if currentUser}}
+            <div class="container_search">
+                <form class="search">
+                    <p><input type="text" name="search" placeholder="Search"></p>
+                </form>
             </div>
+            {{#if chatsListCount}}
+                <div class="chatsList">
+                    {{#each chatsList}}
+                        {{> chatItem}}
+                    {{/each}}
+                </div>
+
+            {{else}}
+                <spun class="no-chats">You haven't chats, please create chats with search field and press Enter</spun>
+            {{/if}}
 
         {{else}}
-            <spun class="no-chats">You haven't chats, please create chats with search field and press Enter</spun>
+            <p>Please log in to messaging</p>
         {{/if}}
-
-    {{else}}
-        <p>Please log in to messaging</p>
-    {{/if}}
-
-
+    </div>
 </template>

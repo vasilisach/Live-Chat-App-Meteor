@@ -1,9 +1,10 @@
 <template name="messages">
-    <div class="container">
+
         <header>
             <h1>Meteor Chat</h1>
             {{> loginButtons}}
         </header>
+    <div class="container">
         <ul class="message-window">
             {{#each recentMessages}}
                 {{> message}}
@@ -14,6 +15,7 @@
                 <button class="more-messages">New Messages &#x25BE;</button>
             {{/if}}
         {{/momentum}}
+    </div>
         <footer>
             {{#if currentUser}}
                 <form class="new-message">
@@ -21,6 +23,6 @@
                 </form>
             {{/if}}
         </footer>
-    </div>
+
 </template>
 
