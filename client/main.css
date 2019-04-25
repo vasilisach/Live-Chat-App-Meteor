@@ -74,7 +74,7 @@ form {
   position: absolute;
   top: 0;
   bottom: 0;
-  height: 450px;
+  height: 400px;
   width: 100%;
   margin: 0 auto;
   background: white;
@@ -123,9 +123,22 @@ form {
   background: #ff5959;
 }
 
-.chat-name {
-  border: 1px solid darkblue;
+.chat-item{
+  border: 1px solid black;
   font-size: 14pt;
   background: #eeeeee;
   position: relative;
+}
+.chat-name{
+  color: #ff5959;
+  font-style: italic;
+  font-size: 15pt;
+}
+.last-message{
+  color: black;
+  font-size: 12pt;
+}
+.time-of-message{
+  color: darkgrey;
+  font-size: 10pt;
 }

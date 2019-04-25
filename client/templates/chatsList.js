@@ -1,6 +1,6 @@
 import { Template } from 'meteor/templating';
 import {Meteor} from "meteor/meteor";
-import {Chats} from "/collections/models";
+import {Chats, Messages} from "/collections/models";
 
 import './chatsList.html';
 import './chatItem.html';

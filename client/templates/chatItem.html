@@ -1,5 +1,7 @@
 <template name="chatItem">
-    <a class="chatItem" href={{pathFor '/chat/:id' id=_id}}>
-        <div class="chat-name">{{participants}}</div>
-    </a>
+    <div class="chat-item">
+        <a href={{pathFor '/chat/:id' id=_id}}>
+            <div class="chat-name">{{participants}}</div>
+        </a>
+    </div>
 </template>

@@ -8,6 +8,7 @@ import '/account-config/config';
 import '/lib/router';
 import '../scroll-to-new-message/scrolling';
 
+var autoScrollingIsActive = false;
 Meteor.subscribe("messages", {
     onReady: function () {
         scrollToBottom();
