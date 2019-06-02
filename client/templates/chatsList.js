@@ -35,5 +35,8 @@ Template.chatsList.events({
             });
         }
 
+    },
+    "click .addToTelegram": function () {
+
     }
 });

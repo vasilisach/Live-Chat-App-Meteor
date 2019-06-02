@@ -28,3 +28,6 @@ arillo:flow-router-helpers
 session
 mrt:moment
 percolate:momentum
+fourseven:scss
+poetic:materialize-scss
+promise

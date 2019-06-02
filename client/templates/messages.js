@@ -40,7 +40,7 @@ Template.messages.events({
         Meteor.call("sendMessage", text, chatId, function (err, res){
             if(err){
                 console.log(err);
-                alert(error.reason)
+                alert(err.reason)
             }else {
                 //console.log('Message inserted with ID:', res);
                 scrollToBottom(250);
