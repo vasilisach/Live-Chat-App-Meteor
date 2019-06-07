@@ -1,6 +1,6 @@
 import { Template } from 'meteor/templating';
 import { Meteor } from 'meteor/meteor';
-import {Messages} from "/collections/models";
+import {Chats,Messages} from "/collections/models";
 
 import './messages.html';
 import './one-message.html'
@@ -15,6 +15,7 @@ Meteor.subscribe("messages", {
         autoScrollingIsActive = true;
     }
 });
+Meteor.subscribe('chats');
 Template.messages.onRendered(function () {
     if (autoScrollingIsActive) {
         scrollToBottom(250);
@@ -63,5 +64,65 @@ Template.messages.events({
     "click .more-messages": function () {
         scrollToBottom(500);
         thereAreUnreadMessages.set(false);
+    },
+    "click .addToTelegram":function () {
+        // FlowRouter.go('/createChat');
+        // var participants=
+        var phone_number = '+380950351849';
+
+        Meteor.call("checkPhoneMethod", phone_number, function (err,res) {
+            if(err){
+                console.log(err.reason);
+            }else {
+                console.log("Phone registered: ",res.phone_registered);
+                if(res.phone_registered){
+                    Meteor.call("sendCodeMethod",phone_number, function (err,res) {
+                        if(err){
+                            console.log(err.reason);
+                        }else {
+                            console.log("Phone code hash: ", res);
+                            var code=prompt("Telegram code");
+                            Meteor.call("signInMethod", phone_number, code, res, function (err,res) {
+                                if(err){
+                                    console.log(err.reason);
+                                }else {
+                                    console.log("Sign in as: ", res);
+                                    var userName='ivanAndriichak';
+                                    Meteor.call("contactsResolveUsername", userName, function (err,res) {
+                                        if(err){
+                                            console.log(err.reason);
+                                        }else {
+                                            console.log("Contact resolve : ", res);
+                                            console.log("User id telegram: ",res.peer.user_id);
+                                            var chatId=FlowRouter.getParam('id');
+                                            console.log("My chat id",chatId);
+                                            var chatName=Chats.findOne({_id:chatId}).participants;
+                                            var chatNameTelegram=chatName.join(' and ');
+                                            console.log("chatName:", chatName);
+                                            var accessHash=res.users["0"].access_hash;
+
+                                            Meteor.call("createTelegramChat", res.peer.user_id, accessHash, chatNameTelegram, function (err,res) {
+                                                if(err){
+                                                    console.log(err.reason);
+                                                }else{
+                                                    console.log("create chat:", res);
+                                                }
+                                            });
+                                            Chats.update(
+                                                {_id: chatId},
+                                                {
+                                                    $set: {telegramChat: res.chats["0"].id}
+                                                }
+                                            )
+                                        }
+                                    })
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        });
+
     }
 });

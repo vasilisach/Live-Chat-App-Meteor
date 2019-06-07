@@ -5,3 +5,4 @@ tests/
 ~*
 *.log
 .meteor/local
+settings.json
