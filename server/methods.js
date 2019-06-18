@@ -46,38 +46,18 @@ Meteor.methods({
             chatId: chat_id
         });
     },
+    incomingMessageTelegram: function(messageText, username, chatId){
+      Messages.insert({
+          messageText:messageText,
+          createdAt: new Date(),
+          username:username,
+          time: moment(new Date()).format("M/D/YY h:mm a"),
+          chatId: chatId
+      })
+    },
 
     //telegram-mtproto methods
 
-    /*checkPhone: async function (phone_number){
-        try{
-            const {result}=await telegramClient('auth.checkPhone', {
-                phone_number: phone_number
-            });
-            console.log(result);
-            return result;
-        }catch (e) {
-            if(e){
-                console.log(e.reason);
-            }
-        }
-    },*/
-    sendCode: async (phone_number)=>{
-        try{
-            const { phone_code_hash } = await telegramClient('auth.sendCode', {
-                phone_number  : phone_number,
-                current_number: false,
-                api_id        : Meteor.settings.public.api_id,
-                api_hash      : Meteor.settings.public.api_hash
-            });
-            console.log(phone_code_hash);
-            return phone_code_hash;
-        }catch (e) {
-            if(e){
-                console.log(e.reason);
-            }
-        }
-    },
     "checkPhoneMethod":  async function checkPhone(phone_number) {
         return await telegramClient('auth.checkPhone', phone_number);
     },
@@ -123,12 +103,12 @@ Meteor.methods({
             fwd_limit: fwdLimit, //int
         })
     },
-    "sendMessageMethod": async function (messageText, userId) {
+    "sendMessageMethod": async function (messageText, chatId) {
 
         const {send_message} = await telegramClient('messages.sendMessage', {
             peer: {
-                _:'inputPeerUser',
-                user_id: userId
+                _:'inputPeerChat',
+                chat_id: chatId
             },
             message: messageText,
             random_id: Math.random() * 10e7 >> 0
@@ -160,5 +140,55 @@ Meteor.methods({
         } else {
             console.log('already signed in')
         }
+    },
+    "receiveMessages": async function(a){
+        return await telegramClient("messages.receivedMessages",{
+            max_id:5
+        })
+    },
+    "updates": async function(){
+        return await telegramClient("updates.getState");
+    },
+    "chatHistory": async function(chatId){
+        const filterLastDay = ({ date }) => new Date(date*1e3) > dayRange();
+
+        const dayRange = () => Date.now() - new Date(86400000*4);
+        const filterUsersMessages = ({ _ }) => _ === 'message';
+
+        const formatMessage = ({ message, date, from_id }) => {
+            const dt = new Date(date*1e3);
+            const hours = dt.getHours();
+            const mins = dt.getMinutes();
+            return `${hours}:${mins} [${from_id}] ${message}`
+        };
+
+        const printMessages = messages => {
+            const filteredMsg = messages.filter(filterUsersMessages);
+            const formatted = filteredMsg.map(formatMessage);
+            formatted.forEach(e => console.log(e));
+            return formatted
+        };
+        const max = 400;
+        const limit = 100;
+        let offset = 0;
+        let full = [],
+            messages = [];
+        do {
+            const history = await telegramClient('messages.getHistory', {
+                peer: {
+                    _          : 'inputPeerChat',
+                    chat_id : chatId
+                },
+                max_id: offset,
+                offset: -full.length,
+                limit: limit
+            });
+            messages = history.messages.filter(filterLastDay);
+            full = full.concat(messages);
+            messages.length > 0 && (offset = messages[0].id);
+            messages.length > 0 && console.log(offset, messages[0].id)
+        } while (messages.length === limit && full.length < max);
+        printMessages(full);
+        return full
     }
 });

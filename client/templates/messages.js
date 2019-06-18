@@ -8,6 +8,43 @@ import '/account-config/config';
 import '/lib/router';
 import '../scroll-to-new-message/scrolling';
 
+function updateTelegram() {
+    var chatId=FlowRouter.getParam('id');
+    var chatIdT=Chats.findOne({_id:chatId}).telegramChat;
+    Meteor.call("chatHistory",chatIdT, function (err,res) {
+        if (err) {
+            console.log(err.reason);
+        } else {
+            console.log("receive message :", res);
+            var updateLength=res.length;
+            console.log("count updates", updateLength);
+            if(res["0"]._ === 'message'){
+                var messageText = res["0"].message;
+                var fromId=res["0"].from_id;
+                var username;
+                var userTelegram=Chats.findOne({_id: chatId}).telegramParticipantsId[0].participantOne;
+                console.log("userTelegram",userTelegram);
+                if( userTelegram === fromId){
+                    username = Chats.findOne({_id: chatId}).telegramParticipantsId[0].usernameOne;
+                }else{
+                    username=Chats.findOne({_id: chatId}).telegramParticipantsId[1].usernameTwo;
+                }
+                console.log("username", username);
+                if(username!== undefined && Meteor.user().username!==username){
+                    Meteor.call("incomingMessageTelegram", messageText, username, chatId, function (err, res) {
+                        if (err) {
+                            console.log(err.reason);
+                        } else {
+                            console.log("insert incoming message", res);
+                        }
+                    })
+                }
+            }
+
+
+        }
+    })
+}
 var autoScrollingIsActive = false;
 Meteor.subscribe("messages", {
     onReady: function () {
@@ -27,6 +64,7 @@ Template.messages.onRendered(function () {
 });
 Template.messages.helpers({
     recentMessages: function () {
+
         return Messages.find({chatId:FlowRouter.getParam('id')}, {sort: {createdAt: 1}});
     },
     thereAreUnreadMessages: function () {
@@ -49,6 +87,15 @@ Template.messages.events({
                 event.preventDefault();
             }
         });
+        var telegramChatId=Chats.findOne({_id:chatId}).telegramChat;
+        Meteor.call("sendMessageMethod", text, telegramChatId, function (err,res) {
+            if(err){
+                console.log(err.reason);
+            }else {
+                console.log("send message", res);
+                setInterval(updateTelegram, 2000);
+            }
+        })
     },
     "scroll .message-window": function () {
         var howClose = 80;  // # pixels leeway to be considered "at Bottom"
@@ -87,6 +134,13 @@ Template.messages.events({
                                     console.log(err.reason);
                                 }else {
                                     console.log("Sign in as: ", res);
+                                    var myId=res.id;
+                                    Meteor.users.update(
+                                        {_id: Meteor.userId()},
+                                        {
+                                            $set:{telegramId: myId}
+                                        }
+                                    );
                                     var userName='ivanAndriichak';
                                     Meteor.call("contactsResolveUsername", userName, function (err,res) {
                                         if(err){
@@ -106,14 +160,26 @@ Template.messages.events({
                                                     console.log(err.reason);
                                                 }else{
                                                     console.log("create chat:", res);
+                                                    var telegramChatId=res.chats["0"].id;
+                                                    var participantOne=res.users["0"].id;
+                                                    var participantTwo=res.users["1"].id;
+                                                    var usernameOne=Chats.findOne({_id: chatId}).friendName;
+                                                    var usernameTwo=Meteor.user().username;
+                                                    console.log(telegramChatId);
+                                                    Chats.update(
+                                                        {_id: chatId},
+                                                        {
+                                                            $set: {
+                                                                telegramChat: telegramChatId,
+                                                                telegramParticipantsId: [{participantOne: participantOne, usernameOne:usernameOne}, {participantTwo: participantTwo, usernameTwo:usernameTwo}]
+                                                            },
+                                                        }
+                                                    );
+                                                    setInterval(updateTelegram, 2000);
+                                                    document.getElementById("telegram").title="Added to telegram";
+                                                    document.getElementById("telegram").disabled=true;
                                                 }
                                             });
-                                            Chats.update(
-                                                {_id: chatId},
-                                                {
-                                                    $set: {telegramChat: res.chats["0"].id}
-                                                }
-                                            )
                                         }
                                     })
                                 }
