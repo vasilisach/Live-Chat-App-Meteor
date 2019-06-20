@@ -174,8 +174,8 @@ Template.messages.events({
                                                             },
                                                         }
                                                     );
-                                                    document.getElementById("telegram").title="Added to telegram";
-                                                    document.getElementById("telegram").disabled=true;
+                                                    document.getElementById("telegram").firstChild.data="Created telegram chat";
+                                                    document.getElementById("telegram").disabled="disabled";
                                                 }
                                             });
                                         }
