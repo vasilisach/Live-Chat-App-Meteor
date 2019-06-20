@@ -46,13 +46,14 @@ Meteor.methods({
             chatId: chat_id
         });
     },
-    incomingMessageTelegram: function(messageText, username, chatId){
+    incomingMessageTelegram: function(messageText, username, chatId, messageId){
       Messages.insert({
           messageText:messageText,
           createdAt: new Date(),
           username:username,
           time: moment(new Date()).format("M/D/YY h:mm a"),
-          chatId: chatId
+          chatId: chatId,
+          messageFromTlId: messageId
       })
     },
 
